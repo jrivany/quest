@@ -1,13 +1,18 @@
 function say(text) {
-    return async function () {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.7;
-        speechSynthesis.speak(utterance);
+    return function () {
+        return new Promise(resolver => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.7;
+            utterance.onend = resolver;
+            speechSynthesis.speak(utterance);
+        });
     }
 }
 
 function pause(ms=5000) {
-    return new Promise(resolver => setTimeout(resolver, ms));
+    return function () {
+        return new Promise(resolver => setTimeout(resolver, ms));
+    }
 }
 
 async function start() {
