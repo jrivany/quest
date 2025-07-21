@@ -1,5 +1,5 @@
 function say(text) {
-    return function () {
+    return function() {
         return new Promise(resolver => {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.7;
@@ -10,13 +10,18 @@ function say(text) {
 }
 
 function pause(ms=5000) {
-    return function () {
+    return function() {
         return new Promise(resolver => setTimeout(resolver, ms));
     }
 }
 
-async function start() {
-    const playerCount = 6;
+function onStart() {
+    const playerCountEl = document.getElementById('player-count');
+    const playerCount = parseInt(playerCountEl.options[playerCountEl.selectedIndex].value);
+    readScript(playerCount);
+}
+
+async function readScript(playerCount) {
     const script = [];
     script.push(say('Everybody close your eyes and place your fists out in front of you.'));
     script.push(say('Minions of mordred except the blind hunter, open your eyes so that you may know each other'));
@@ -30,6 +35,7 @@ async function start() {
     script.push(pause());
     script.push(say('Cleric: close your eyes. Leader: lower your thumb if it is up.'));
     script.push(pause(2000));
+    script.push(say('Let\'s begin!'));
 
     for (const step of script) {
         await step();
@@ -38,5 +44,5 @@ async function start() {
 
 window.addEventListener('DOMContentLoaded', function() {
     const buttonEl = document.getElementById('start-button');
-    buttonEl.addEventListener('click', start);
+    buttonEl.addEventListener('click', onStart);
 });
