@@ -25,6 +25,10 @@ async function readScript(playerCount) {
     const script = [];
     script.push(say('Everybody close your eyes and place your fists out in front of you.'));
     script.push(say('Minions of mordred except the blind hunter, open your eyes so that you may know each other'));
+    if (playerCount > 4) {
+        const evilEyes = Math.floor((playerCount - 1) / 2);
+        script.push(say('There should be ' + evilEyes + ' sets of eyes open.'));
+    }
     if (playerCount < 6) {
         script.push(say('Blind hunter, raise your thumb so that evil may know you.'));
     }
