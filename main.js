@@ -83,7 +83,7 @@ window.addEventListener('DOMContentLoaded', function() {
         const playerCountEl = document.getElementById('player-count');
         const playerCount = parseInt(playerCountEl.options[playerCountEl.selectedIndex].value);
         const voiceSelectEl = document.getElementById('voice-select');
-        const voice = voices[voiceSelect.options[voiceSelectEl.selectedIndex].value];
+        const voice = voices[voiceSelectEl.options[voiceSelectEl.selectedIndex].value];
         readScript(playerCount, voice);
     });
 });
