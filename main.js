@@ -6,7 +6,7 @@ function say(text) {
     }
 }
 
-function pause(ms=10000) {
+function pause(ms=5000) {
     return new Promise(resolver => setTimeout(resolver, ms));
 }
 
