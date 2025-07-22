@@ -38,7 +38,8 @@ class ScriptBuilder {
 async function readScript(playerCount, script) {
     script.say('Everyone close your eyes and place your fists out in front of you.');
     script.pause(500);
-    if (playerCount < 6) {
+    const blindHunterKnown = playerCount < 6;
+    if (blindHunterKnown) {
         script.say('Blind Hunter, raise your thumb so that evil may know you.');
         script.pause(500);
     }
@@ -50,8 +51,10 @@ async function readScript(playerCount, script) {
     }
     script.pause();
     script.say('Minions of Mordred, close your eyes.');
-    script.pause(500);
-    script.say('Blind Hunter, re-form your hand into a fist.');
+    if (blindHunterKnown) {
+        script.pause(500);
+        script.say('Blind Hunter, re-form your hand into a fist.');
+    }
     script.pause(1500);
     script.say('Leader, extend your thumb if you are Evil.');
     script.pause(500);
