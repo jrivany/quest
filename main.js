@@ -118,6 +118,70 @@ window.addEventListener('DOMContentLoaded', function() {
     const startButton = document.getElementById('start-button');
     const voiceSelect = document.getElementById("voice-select");
     const questForm = document.getElementById('quest-form');
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    // Theme management
+    function getSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    
+    function getStoredTheme() {
+        return localStorage.getItem('theme') || 'system';
+    }
+    
+    function setTheme(theme) {
+        if (theme === 'system') {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.removeItem('theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+        updateThemeToggle();
+    }
+    
+    function updateThemeToggle() {
+        const currentTheme = getStoredTheme();
+        const effectiveTheme = currentTheme === 'system' ? getSystemTheme() : currentTheme;
+        
+        if (currentTheme === 'system') {
+            themeToggle.textContent = '🌓'; // Auto
+            themeToggle.title = 'Theme: Auto (follows system)';
+        } else if (effectiveTheme === 'dark') {
+            themeToggle.textContent = '☀️'; // Light mode icon when in dark mode
+            themeToggle.title = 'Switch to light mode';
+        } else {
+            themeToggle.textContent = '🌙'; // Dark mode icon when in light mode
+            themeToggle.title = 'Switch to dark mode';
+        }
+    }
+    
+    function cycleTheme() {
+        const currentTheme = getStoredTheme();
+        if (currentTheme === 'system' || currentTheme === 'light') {
+            setTheme('dark');
+        } else if (currentTheme === 'dark') {
+            setTheme('light');
+        }
+    }
+    
+    // Initialize theme
+    const storedTheme = getStoredTheme();
+    if (storedTheme !== 'system') {
+        setTheme(storedTheme);
+    } else {
+        updateThemeToggle();
+    }
+    
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (getStoredTheme() === 'system') {
+            updateThemeToggle();
+        }
+    });
+    
+    // Theme toggle event
+    themeToggle.addEventListener('click', cycleTheme);
     
     function updateVoices() {
         voices = populateVoiceList();
