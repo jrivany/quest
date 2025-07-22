@@ -110,24 +110,23 @@ window.addEventListener('DOMContentLoaded', function() {
     
     function updateVoices() {
         voices = populateVoiceList();
-        // Enable button only if voices are loaded
-        startButton.disabled = Object.keys(voices).length === 0;
     }
     
     function updateButtonState() {
-        const hasVoiceSelected = voiceSelect.value !== "";
-        startButton.disabled = !hasVoiceSelected || Object.keys(voices).length === 0;
+        // Button is always enabled - users can start without selecting a voice
+        startButton.disabled = false;
     }
     
     // Initial population
     updateVoices();
+    updateButtonState(); // Enable the button initially
     
     // Listen for voices to be loaded
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = updateVoices;
     }
     
-    // Update button state when voice selection changes
+    // Update button state when voice selection changes (though it stays enabled)
     voiceSelect.addEventListener('change', updateButtonState);
     
     // Handle form submission
