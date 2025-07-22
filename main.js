@@ -1,11 +1,12 @@
 class ScriptBuilder {
-    constructor(voice) {
+    constructor(voice, speed=0.7) {
         this.script = [];
         this.voice = voice;
+        this.speed = speed;
     }
 
     async perform() {
-        for (const step of script) {
+        for (const step of this.script) {
             await step();
         }
         this.script = [];  
@@ -15,9 +16,11 @@ class ScriptBuilder {
         this.script.push(
             () => new Promise(resolver => {
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.7;
+                utterance.rate = this.speed;
                 utterance.onend = resolver;
-                utterance.voice = this.voice;
+                if (this.voice) {
+                    utterance.voice = this.voice;
+                }
                 speechSynthesis.speak(utterance);
             })
         );
@@ -30,8 +33,7 @@ class ScriptBuilder {
     }
 }
 
-async function readScript(playerCount, voice) {
-    const script = new ScriptBuilder(voice);
+async function readScript(playerCount, script) {
     script.say('Everybody close your eyes and place your fists out in front of you.');
     script.say('Minions of mordred except the blind hunter, open your eyes so that you may know each other');
     if (playerCount > 4) {
@@ -59,31 +61,108 @@ function populateVoiceList() {
     }
 
     const voices = speechSynthesis.getVoices();
+    const voiceSelect = document.getElementById("voice-select");
+    const voiceStatus = document.getElementById("voice-status");
+    
+    // Clear existing options
+    voiceSelect.innerHTML = "";
+
+    if (voices.length === 0) {
+        const option = document.createElement("option");
+        option.textContent = "No voices available";
+        option.value = "";
+        voiceSelect.appendChild(option);
+        voiceStatus.innerHTML = '<span style="color: #ff4444;">⚠️ No voices found</span>';
+        return voiceMap;
+    }
+
+    // Add default option
+    const defaultOption = document.createElement("option");
+    defaultOption.textContent = "Select a voice...";
+    defaultOption.value = "";
+    voiceSelect.appendChild(defaultOption);
 
     for (const voice of voices) {
         const option = document.createElement("option");
-        const key =  `${voice.name} (${voice.lang})`;
+        const key = `${voice.name} (${voice.lang})`;
         voiceMap[key] = voice;
         option.textContent = key;
 
         if (voice.default) {
             option.textContent += " — DEFAULT";
+            option.selected = "selected";
         }
 
         option.value = key;
-        document.getElementById("voice-select").appendChild(option);
+        voiceSelect.appendChild(option);
     }
+    
+    voiceStatus.innerHTML = `<span style="color: #28a745;">✅ ${voices.length} voices loaded</span>`;
+    
     return voiceMap;
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-    const voices = populateVoiceList();
-    const buttonEl = document.getElementById('start-button');
-    buttonEl.addEventListener('click', () => {
+    let voices = {};
+    const startButton = document.getElementById('start-button');
+    const voiceSelect = document.getElementById("voice-select");
+    const questForm = document.getElementById('quest-form');
+    
+    function updateVoices() {
+        voices = populateVoiceList();
+        // Enable button only if voices are loaded
+        startButton.disabled = Object.keys(voices).length === 0;
+    }
+    
+    function updateButtonState() {
+        const hasVoiceSelected = voiceSelect.value !== "";
+        startButton.disabled = !hasVoiceSelected || Object.keys(voices).length === 0;
+    }
+    
+    // Initial population
+    updateVoices();
+    
+    // Listen for voices to be loaded
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = updateVoices;
+    }
+    
+    // Update button state when voice selection changes
+    voiceSelect.addEventListener('change', updateButtonState);
+    
+    // Handle form submission
+    questForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
         const playerCountEl = document.getElementById('player-count');
         const playerCount = parseInt(playerCountEl.options[playerCountEl.selectedIndex].value);
-        const voiceSelectEl = document.getElementById('voice-select');
-        const voice = voices[voiceSelectEl.options[voiceSelectEl.selectedIndex].value];
-        readScript(playerCount, voice);
+        
+        const selectedVoiceItem = voiceSelect.options[voiceSelect.selectedIndex];
+        let voice;
+        if (selectedVoiceItem && selectedVoiceItem.value) {
+            voice = voices[selectedVoiceItem.value];
+        }
+
+        let speed;
+        const speedSelectEl = document.getElementById('voice-speed-select');
+        const selectedSpeedItem = speedSelectEl.options[speedSelectEl.selectedIndex];
+        if (selectedSpeedItem) {
+            speed = parseFloat(selectedSpeedItem.value);
+        }
+        
+        // Disable button during execution
+        startButton.disabled = true;
+        startButton.textContent = "🎭 Running Quest Opening...";
+        
+        const script = new ScriptBuilder(voice, speed);
+        readScript(playerCount, script).then(() => {
+            // Re-enable button after completion
+            startButton.disabled = false;
+            startButton.textContent = "🎲 Start Quest Opening";
+        }).catch(() => {
+            // Re-enable button on error
+            startButton.disabled = false;
+            startButton.textContent = "🎲 Start Quest Opening";
+        });
     });
 });
