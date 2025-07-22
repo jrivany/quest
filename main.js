@@ -26,31 +26,42 @@ class ScriptBuilder {
         );
     }
 
-    pause(ms=1000) {
+    pause(ms=5000) {
         this.script.push(
             () => new Promise(resolver => setTimeout(resolver, ms))
         );
     }
 }
 
+
+
 async function readScript(playerCount, script) {
-    script.say('Everybody close your eyes and place your fists out in front of you.');
-    script.say('Minions of mordred except the blind hunter, open your eyes so that you may know each other');
+    script.say('Everyone close your eyes and place your fists out in front of you.');
+    script.pause(500);
+    if (playerCount < 6) {
+        script.say('Blind Hunter, raise your thumb so that evil may know you.');
+        script.pause(500);
+    }
+    script.say('Minions of Mordred - except the Blind Hunter - open your eyes and look around so that you know all agents of Evil');
+    script.pause(500);
     if (playerCount > 4) {
         const evilEyes = Math.floor((playerCount - 1) / 2);
         script.say('There should be ' + evilEyes + ' sets of eyes open.');
     }
-    if (playerCount < 6) {
-        script.say('Blind hunter, raise your thumb so that evil may know you.');
-    }
     script.pause();
-    script.say('Everybody close your eyes.');
-    script.say('Cleric: open your eyes and observe the leader.');
-    script.say('Leader: if you are evil, raise your thumb.');
-    script.pause();
-    script.say('Cleric: close your eyes. Leader: lower your thumb if it is up.');
-    script.pause(2000);
-    script.say('Let\'s begin!');
+    script.say('Minions of Mordred, close your eyes.');
+    script.pause(500);
+    script.say('Blind Hunter, re-form your hand into a fist.');
+    script.pause(1500);
+    script.say('Leader, extend your thumb if you are Evil.');
+    script.pause(500);
+    script.say('Cleric, open your eyes and observe the leader.');
+    script.pause(2500);
+    script.say('Cleric, close your eyes.');
+    script.pause(500);
+    script.say('Leader, re-form your hand into a fist.');
+    script.pause(1500);
+    script.say('Everyone open your eyes!');
     await script.perform();
 }
 
